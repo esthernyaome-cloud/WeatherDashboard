@@ -7,12 +7,21 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          fetch-depth: 0
+
+      - name: Deploy to gh-pages
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-action"
+          git checkout --orphan gh-pages
+          git rm -rf .github/ .gitignore .nojekyll README.md 2>/dev/null || true
+          git clean -fd
+          git add .
+          git commit -m "Deploy site" --allow-empty
+          git push origin gh-pages -f
